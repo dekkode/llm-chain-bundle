@@ -8,6 +8,8 @@ use PhpLlm\LlmChain\Bridge\Anthropic\Claude;
 use PhpLlm\LlmChain\Bridge\Anthropic\PlatformFactory as AnthropicPlatformFactory;
 use PhpLlm\LlmChain\Bridge\Azure\OpenAI\PlatformFactory as AzureOpenAIPlatformFactory;
 use PhpLlm\LlmChain\Bridge\Azure\Store\SearchStore as AzureSearchStore;
+use PhpLlm\LlmChain\Bridge\Bedrock\Nova\Nova;
+use PhpLlm\LlmChain\Bridge\Bedrock\PlatformFactory as BedrockPlatformFactory;
 use PhpLlm\LlmChain\Bridge\ChromaDB\Store as ChromaDBStore;
 use PhpLlm\LlmChain\Bridge\Google\Gemini;
 use PhpLlm\LlmChain\Bridge\Google\PlatformFactory as GooglePlatformFactory;
@@ -212,6 +214,20 @@ final class LlmChainExtension extends Extension
             return;
         }
 
+        if ('bedrock' === $type) {
+            $platformId = 'llm_chain.platform.bedrock';
+            $definition = (new Definition(Platform::class))
+                ->setFactory(BedrockPlatformFactory::class.'::create')
+                ->setAutowired(true)
+                ->setLazy(true)
+                ->addTag('proxy', ['interface' => PlatformInterface::class])
+                ->addTag('llm_chain.platform');
+
+            $container->setDefinition($platformId, $definition);
+
+            return;
+        }
+
         throw new \InvalidArgumentException(sprintf('Platform "%s" is not supported for configuration via bundle at this point.', $type));
     }
 
@@ -228,6 +244,7 @@ final class LlmChainExtension extends Extension
             'claude' => Claude::class,
             'llama' => Llama::class,
             'gemini' => Gemini::class,
+            'nova' => Nova::class,
             default => throw new \InvalidArgumentException(sprintf('Model "%s" is not supported.', $modelName)),
         };
         $llmDefinition = new Definition($llmClass);

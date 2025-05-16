@@ -48,6 +48,8 @@ final class Configuration implements ConfigurationInterface
                                 ->scalarNode('api_key')->isRequired()->end()
                             ->end()
                         ->end()
+                        ->arrayNode('bedrock')
+                        ->end()
                     ->end()
                 ->end()
                 ->arrayNode('chain')
